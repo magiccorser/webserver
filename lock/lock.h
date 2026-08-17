@@ -24,7 +24,7 @@ public:
     {
         return pthread_mutex_lock(&m_mutex);
     }
-    bool locked()
+    bool unlock()
     {
         return pthread_mutex_unlock(&m_mutex);
     }
