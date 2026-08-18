@@ -16,7 +16,7 @@ private:
 public:
     sqlcon_pool();
     ~sqlcon_pool();
-    sqlcon_pool *get_instance();
+    static sqlcon_pool *get_instance();
     MYSQL *get_con();
     void sqlcon_pool_init(int max_conn, std::string host, std::string user, std::string password, std::string db, unsigned int port);
     void destroy_pool();
