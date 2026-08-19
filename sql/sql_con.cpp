@@ -30,17 +30,18 @@ MYSQL *sqlcon_pool::get_con()
     return con;
 }
 
-void sqlcon_pool::sqlcon_pool_init(int max_conn, std::string host, std::string user, std::string password, std::string db, unsigned int port)
+void sqlcon_pool::sqlcon_pool_init(int max_conn, std::string host, std::string user, std::string password, std::string db, unsigned int port, int close_log)
 {
+    m_close_log = close_log;
     for(int i = 0;i < max_conn; i++){
         MYSQL *con = mysql_init(nullptr);
         if(con == nullptr){
-            //写日志,sql连接创建失败
+            LOG_ERROR("MySQL Error");
             exit(1);
         }
         con = mysql_real_connect(con, host.c_str(), user.c_str(), password.c_str(), db.c_str(), port, nullptr, 0);
         if(con == nullptr){
-            //写日志，连接失败
+            LOG_ERROR("MySQL Error");
             exit(1);
         }
         free_connum++;

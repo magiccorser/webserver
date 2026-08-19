@@ -6,7 +6,7 @@
 template <typename T>
 class blockqueue{
 private:
-    T array[1000];
+    T *array;
     cond m_cond;
     locker m_lock;
     int m_front;
@@ -17,6 +17,12 @@ public:
         m_front = -1;
         m_back = -1;
         m_size = 0;
+    }
+    blockqueue(int max_size){
+        m_front = -1;
+        m_back = -1;
+        m_size = 0;
+        array = new T(max_size);
     }
     ~blockqueue(){}
     bool isEmpty(){
@@ -73,7 +79,7 @@ public:
         return tmp;
     }
     int max_size(){
-        return 1000;
+        return max_size;
     }
 };
 

@@ -4,6 +4,7 @@
 #include <mysql/mysql.h>
 #include <queue>
 #include <string>
+#include "../log/log.h"
 #include "../lock/lock.h"
 
 class sqlcon_pool{
