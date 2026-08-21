@@ -84,3 +84,23 @@ mysql  Ver 8.0.46-0ubuntu0.22.04.3 for Linux on x86_64 ((Ubuntu))
 安装命令:
 sudo apt install mysql-client           //安装mysql客户端
 sudo apt install libmysqlclient-dev     //c++库头文件
+
+数据库创建
+CREATE TABLE device (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    qrcode VARCHAR(255) UNIQUE NOT NULL
+);
+
+CREATE TABLE user (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE user_device (
+    user_id INT NOT NULL,
+    device_id INT NOT NULL,
+    PRIMARY KEY (user_id, device_id),
+    FOREIGN KEY (user_id) REFERENCES user(id),
+    FOREIGN KEY (device_id) REFERENCES device(id)
+);
