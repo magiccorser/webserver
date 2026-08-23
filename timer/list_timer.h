@@ -56,4 +56,26 @@ public:
     void tick();
 };
 
+class utils{
+private:
+    int m_TIMESLOT;
+
+public:
+    sort_timer_list timer_list;
+    static int *u_pipefd;
+    static int u_epollfd;
+    utils() {}
+    ~utils() {}
+    void init(int timeslot);
+    int setnoblocking(int fd);
+    //将内核事件表注册读事件，ET模式，选择开启EPOLLONESHOT
+    void addfd(int epollfd, int fd, bool one_shot, int TRIGMode);
+    void modfd(int epollfd, int fd, int ev, int TRIGMode);
+    void removefd(int epollfd, int fd);
+    static void sig_handler(int sig);
+    void addsig(int sig, void(handler)(int), bool restart = true);
+    void timer_handler();
+    void show_error(int connfd, const char *info);
+};
+
 #endif
