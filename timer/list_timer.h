@@ -69,8 +69,8 @@ public:
     void init(int timeslot);
     int setnoblocking(int fd);
     //将内核事件表注册读事件，ET模式，选择开启EPOLLONESHOT
-    void addfd(int epollfd, int fd, bool one_shot, int TRIGMode);
-    void modfd(int epollfd, int fd, int ev, int TRIGMode);
+    void addfd(int epollfd, int fd);
+    void modfd(int epollfd, int fd, int ev);
     void removefd(int epollfd, int fd);
     static void sig_handler(int sig);
     void addsig(int sig, void(handler)(int), bool restart = true);

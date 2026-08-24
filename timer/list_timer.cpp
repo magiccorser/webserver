@@ -122,3 +122,39 @@ void sort_timer_list::tick()
         tem = head;
     }
 }
+
+void utils::init(int timeslot)
+{
+    m_TIMESLOT = timeslot;
+}
+
+int utils::setnoblocking(int fd)
+{
+    int old_flags = fcntl(fd, F_GETFL);
+    int new_flags = old_flags | O_NONBLOCK;
+    fcntl(fd, F_SETFL, new_flags);
+    return old_flags;
+}
+
+void utils::addfd(int epollfd, int fd)
+{
+    epoll_event ev;
+    ev.data.fd = fd;
+    ev.events = EPOLLIN | EPOLLRDHUP | EPOLLONESHOT | EPOLLET;
+    setnoblocking(fd);
+    epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev);
+}
+
+void utils::modfd(int epollfd, int fd, int ev)
+{
+    epoll_event event;
+    event.data.fd = fd;
+    event.events = ev | EPOLLET | EPOLLONESHOT | EPOLLRDHUP;
+    epoll_ctl(epollfd, EPOLL_CTL_MOD, fd, &event);
+}
+
+void utils::removefd(int epollfd, int fd)
+{
+    epoll_ctl(epollfd, EPOLL_CTL_DEL, fd, 0);
+    close(fd);
+}
