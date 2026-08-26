@@ -5,6 +5,7 @@
 std::vector<std::pair<std::string, std::string>> user;
 std::vector<std::string> device;
 std::map<int, int> about;
+static int m_user_count = 0;
 
 void http_conn::init_mysql(sqlcon_pool *connection)
 {

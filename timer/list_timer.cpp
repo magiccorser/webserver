@@ -158,3 +158,46 @@ void utils::removefd(int epollfd, int fd)
     epoll_ctl(epollfd, EPOLL_CTL_DEL, fd, 0);
     close(fd);
 }
+
+void utils::sig_handler(int sig)
+{
+    int save_errno = errno;
+    int msg = sig;
+    send(u_pipefd[1], (char *)&msg, 1, 0);
+    errno = save_errno;
+}
+
+void utils::addsig(int sig, void(handler)(int), bool restart)
+{
+    struct sigaction sa;                    //Linux 信号注册结构体。
+    memset(&sa, '\0', sizeof(sa));          
+    sa.sa_handler = handler;                //绑定信号到来时调用的函数（就是上面的sig_handler
+    if(restart)
+        sa.sa_flags |= SA_RESTART;          //被信号中断的系统调用自动重启（如 recv、accept），防止服务器报错退出
+    sigfillset(&sa.sa_mask);                //在处理信号时屏蔽所有其他信号，防止信号嵌套混乱
+    assert(sigaction(sig, &sa, NULL) != -1);
+}
+
+void utils::timer_handler()
+{
+    timer_list.tick();
+    alarm(m_TIMESLOT);
+}
+
+void utils::show_error(int connfd, const char *info)
+{
+    send(connfd, info, sizeof(info), 0);
+    close(connfd);
+}
+
+int *utils::u_pipefd = 0;
+int utils::u_epollfd = 0;
+
+class utils;
+void func(client_data *user_data)
+{
+    epoll_ctl(utils::u_epollfd, EPOLL_CTL_DEL, user_data->sockfd, 0);
+    assert(user_data);
+    close(user_data->sockfd);
+    http_conn::m_user_count--;
+}

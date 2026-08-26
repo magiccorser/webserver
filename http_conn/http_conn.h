@@ -8,6 +8,7 @@ private:
 
 public:
     int m_close_log;
+    static int m_user_count;
     void init_mysql(sqlcon_pool *connection);
                                   
 };
