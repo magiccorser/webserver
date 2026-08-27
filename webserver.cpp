@@ -1,5 +1,9 @@
 #include "webserver.h"
 
+void webserver::init()
+{
+}
+
 void webserver::create_listen()
 {
     int ret;
@@ -36,4 +40,64 @@ void webserver::create_listen()
 
     // 启动定时心跳
     alarm(TIMESLOT);
+}
+
+void webserver::add_to_listtimer(int sockfd, sockaddr_in addr)
+{
+    util_timer *timer;
+    timer->data->address = addr;
+    timer->data->sockfd = sockfd;
+    timer->func = func;
+    time_t cur = time(NULL);
+    timer->time = cur + 3 * TIMESLOT;
+    m_utils.timer_list.add_timer(timer);
+}
+
+bool webserver::epoll_run()
+{
+    struct sockaddr_in client_addr;
+    socklen_t socklen = sizeof(client_addr);
+    while(1){
+        int acceptfd = accept(m_listenfd, (sockaddr *)&client_addr, &socklen);
+        if(acceptfd < 0){
+            LOG_ERROR("%s:errno is:%d", "accept error", errno);
+            break;
+        }
+        else if(http_conn::m_user_count > MAX_FD){
+            LOG_ERROR("%s", "Internal server busy");
+            break;
+        }
+        add_to_listtimer(acceptfd, client_addr);
+    }
+    return true;
+}
+
+void webserver::epoll_dealevent()
+{
+    epoll_event events[MAX_EVENT_NUMBER];
+    while(1){
+        int number = epoll_wait(m_epollfd, events, MAX_EVENT_NUMBER, -1);
+        if(number < 0 && errno != EINTR){
+            LOG_ERROR("%s", "epoll failure");
+            break;
+        }
+        for(int i = 0;i < number;i++){
+            int sockfd = events[i].data.fd;
+            if(sockfd == m_listenfd){
+                //说明有新的连接，处理新连接
+            }
+            else if(events[i].events & (EPOLLRDHUP | EPOLLHUP | EPOLLERR)){
+                //连接出错，关闭连接，删掉计时器
+                m_utils.removefd(m_epollfd, sockfd);
+                util_timer *timer = nullptr;
+                m_utils.timer_list.del_timer(timer);
+            }else if((sockfd == m_pipefd[0]) && (events[i].events & EPOLLIN)){
+                //读信号管道，执行tick()清理超时连接
+            }else if(events[i].events & EPOLLIN){
+                //读客户端数据
+            }else if(events[i].events & EPOLLOUT){
+                //往客户端写数据
+            }
+        }
+    }
 }
